@@ -1,63 +1,72 @@
--- This Script is Part of the Prometheus Obfuscator by levno-710
---
--- highlightlua.lua
---
--- This Script provides a simple Method for Syntax Highlighting of Lua code
+local Tokenizer = require("limitless.tokenizer")
+local util = require("limitless.util")
+local colors = require("colors")
 
-local Tokenizer = require("prometheus.tokenizer");
-local colors = require("colors");
-local TokenKind = Tokenizer.TokenKind;
-local lookupify = require("prometheus.util").lookupify;
+local TokenKind = Tokenizer.TokenKind
+local lookupify = util.lookupify
+
+local NON_COLORED_SYMBOLS = lookupify({
+    ",", ";", "(", ")", "{", "}", ".", ":", "[", "]"
+})
+
+local DEFAULT_GLOBALS = lookupify({
+    "string",
+    "table",
+    "bit",
+    "bit32"
+})
 
 return function(code, luaVersion)
-    local out = "";
     local tokenizer = Tokenizer:new({
-        LuaVersion = luaVersion,
-    });
+        LuaVersion = luaVersion
+    })
 
-    tokenizer:append(code);
-    local tokens = tokenizer:scanAll();
+    tokenizer:append(code)
 
-    local nonColorSymbols = lookupify{
-        ",", ";", "(", ")", "{", "}", ".", ":", "[", "]"
-    }
+    local tokens = tokenizer:scanAll()
+    local output = {}
+    local position = 1
 
-    local defaultGlobals = lookupify{
-        "string", "table", "bit32", "bit"
-    }
-
-    local currentPos = 1;
     for _, token in ipairs(tokens) do
-        if token.startPos >= currentPos then
-            out = out .. string.sub(code, currentPos, token.startPos);
-        end
-        if token.kind == TokenKind.Ident then
-            if defaultGlobals[token.source] then
-                out = out .. colors(token.source, "red");
-            else
-                out = out .. token.source;
-            end
-        elseif token.kind == TokenKind.Keyword then
-            if token.source == "nil" then
-                out = out .. colors(token.source, "yellow");
-            else
-                out = out .. colors(token.source, "yellow");
-            end
-        elseif token.kind == TokenKind.Symbol then
-            if nonColorSymbols[token.source] then
-                out = out .. token.source;
-            else
-                out = out .. colors(token.source, "yellow");
-            end
-        elseif token.kind == TokenKind.String then
-            out = out .. colors(token.source, "green")
-        elseif token.kind == TokenKind.Number then
-            out = out .. colors(token.source, "red")
-        else
-            out = out .. token.source;
+        if token.startPos >= position then
+            output[#output + 1] = code:sub(position, token.startPos)
         end
 
-        currentPos = token.endPos + 1;
+        local text = token.source
+
+        if token.kind == TokenKind.Ident then
+            if DEFAULT_GLOBALS[text] then
+                output[#output + 1] = colors(text, "red")
+            else
+                output[#output + 1] = text
+            end
+
+        elseif token.kind == TokenKind.Keyword then
+            output[#output + 1] = colors(text, "yellow")
+
+        elseif token.kind == TokenKind.Symbol then
+            if NON_COLORED_SYMBOLS[text] then
+                output[#output + 1] = text
+            else
+                output[#output + 1] = colors(text, "yellow")
+            end
+
+        elseif token.kind == TokenKind.String then
+            output[#output + 1] = colors(text, "green")
+
+        elseif token.kind == TokenKind.Number then
+            output[#output + 1] = colors(text, "red")
+
+        else
+            output[#output + 1] = text
+        end
+
+        position = token.endPos + 1
     end
-    return out;
+
+    if position <= #code then
+        output[#output + 1] = code:sub(position)
+    end
+
+    return table.concat(output)
 end
