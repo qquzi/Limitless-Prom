@@ -1,10 +1,3 @@
--- This Script is Part of the Prometheus Obfuscator by levno-710
---
--- pipeline.lua
---
--- This Script provides a configurable obfuscation pipeline that can obfuscate code using different modules
--- These modules can simply be added to the pipeline.
-
 local Enums = require("prometheus.enums");
 local util = require("prometheus.util");
 local Parser = require("prometheus.parser");
@@ -77,7 +70,7 @@ end
 function Pipeline:fromConfig(config)
 	config = config or {};
 	local pipeline = Pipeline:new({
-		LuaVersion = config.LuaVersion or LuaVersion.Lua51;
+		LuaVersion = config.LuaVersion or LuaVersion.LuaU;
 		PrettyPrint = config.PrettyPrint or false;
 		VarNamePrefix = config.VarNamePrefix or "";
 		Seed = config.Seed or 0;
@@ -139,7 +132,7 @@ function Pipeline:setLuaVersion(luaVersion)
 end
 
 function Pipeline:getLuaVersion()
-	return self.luaVersion;
+	return self.LuaVersion;
 end
 
 function Pipeline:setNameGenerator(nameGenerator)
