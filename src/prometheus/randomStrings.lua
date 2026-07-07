@@ -1,9 +1,3 @@
--- This Script is Part of the Prometheus Obfuscator by levno-710
---
--- randomStrings.lua
---
--- This Script provides a library for generating random strings
-
 local Ast = require("prometheus.ast")
 local utils = require("prometheus.util")
 local charset = utils.chararray("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890")
