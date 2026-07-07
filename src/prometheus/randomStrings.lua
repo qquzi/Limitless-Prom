@@ -10,15 +10,18 @@ local charset = utils.chararray("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZX
 
 local function randomString(wordsOrLen)
 	if type(wordsOrLen) == "table" then
-		return wordsOrLen[math.random(1, #wordsOrLen)];
+		return wordsOrLen[math.random(1, #wordsOrLen)]
 	end
 
-	wordsOrLen = wordsOrLen or math.random(2, 15);
-	if wordsOrLen > 0 then
-		return randomString(wordsOrLen - 1) .. charset[math.random(1, #charset)]
-	else
-		return ""
+	wordsOrLen = wordsOrLen or math.random(2, 15)
+
+	local chars = {}
+
+	for i = 1, wordsOrLen do
+		chars[i] = charset[math.random(1, #charset)]
 	end
+
+	return table.concat(chars)
 end
 
 local function randomStringNode(wordsOrLen)
