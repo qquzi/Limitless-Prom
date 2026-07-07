@@ -1,9 +1,3 @@
--- This Script is Part of the Prometheus Obfuscator by levno-710
---
--- randomLiterals.lua
---
--- This Script provides a library for creating random literals
-
 local Ast = require("prometheus.ast");
 local RandomStrings = require("prometheus.randomStrings");
 
@@ -29,15 +23,15 @@ function RandomLiterals.Number()
 end
 
 function RandomLiterals.Any(pipeline)
-    local type = math.random(1, 3);
-    if type == 1 then
+    local literalType = math.random(1, 3);
+
+    if literalType == 1 then
         return RandomLiterals.String(pipeline);
-    elseif type == 2 then
+    elseif literalType == 2 then
         return RandomLiterals.Number();
-    elseif type == 3 then
+    elseif literalType == 3 then
         return RandomLiterals.Dictionary();
     end
 end
-
 
 return RandomLiterals;
