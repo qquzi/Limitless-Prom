@@ -1,16 +1,3 @@
--- This Script is Part of the Prometheus Obfuscator by levno-710
---
--- parser.lua
--- Overview:
--- This Script provides a class for parsing of lua code.
--- This Parser is Capable of parsing LuaU and Lua5.1
---
--- Note that when parsing LuaU "continue" is treated as a Keyword, so no variable may be named "continue" even though this would be valid in LuaU
---
--- Settings Object:
--- luaVersion : The LuaVersion of the Script - Currently Supported : Lua51 and LuaU
---
-
 local Tokenizer = require("prometheus.tokenizer");
 local Enums = require("prometheus.enums");
 local util = require("prometheus.util");
@@ -75,8 +62,6 @@ function Parser:new(settings)
 
 	return parser;
 end
-
--- Function to peek the n'th token
 local function peek(self, n)
 	n = n or 0;
 	local i = self.index + n + 1;
@@ -86,7 +71,6 @@ local function peek(self, n)
 	return self.tokens[i];
 end
 
--- Function to get the next Token
 local function get(self)
 	local i = self.index + 1;
 	if i > self.length then
@@ -140,7 +124,6 @@ local function expect(self, kind, source)
 	end
 end
 
--- Parse the given code to an Abstract Syntax Tree
 function Parser:parse(code)
 	self.tokenizer:append(code);
 	self.tokens = self.tokenizer:scanAll();
@@ -941,7 +924,8 @@ function Parser:expressionLiteral(scope)
 	end
 
 	-- IfElse
-	if(LuaVersion.LuaU) then
+		-- LuaU if-expression
+	if(self.luaVersion == LuaVersion.LuaU) then
 		if(consume(self, TokenKind.Keyword, "if")) then
 			local condition = self:expression(scope);
 			expect(self, TokenKind.Keyword, "then");
