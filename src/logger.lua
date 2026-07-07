@@ -1,64 +1,64 @@
--- This Script is Part of the Prometheus Obfuscator by levno-710
---
--- logger.lua
---
--- This Script provides a Logger for Prometheus.
+local config = require("config")
+local colors = require("colors")
 
 local logger = {}
-local config = require("config");
-local colors = require("colors");
 
 logger.LogLevel = {
-	Error = 0,
-	Warn = 1,
-	Log = 2,
-	Info = 2,
-	Debug = 3,
+    Error = 0,
+    Warn = 1,
+    Info = 2,
+    Debug = 3
 }
 
-logger.logLevel = logger.LogLevel.Log;
+logger.logLevel = logger.LogLevel.Info
 
-logger.debugCallback = function(...)
-	print(colors(config.NameUpper .. ": " ..  ..., "grey"));
-end;
-function logger:debug(...)
-	if self.logLevel >= self.LogLevel.Debug then
-		self.debugCallback(...);
-	end
+logger.callbacks = {
+    Error = function(message)
+        io.stderr:write(colors(message, "red") .. "\n")
+    end,
+
+    Warn = function(message)
+        print(colors(message, "yellow"))
+    end,
+
+    Info = function(message)
+        print(colors(message, "magenta"))
+    end,
+
+    Debug = function(message)
+        print(colors(message, "grey"))
+    end
+}
+
+local function emit(level, colorName, ...)
+    if logger.logLevel < logger.LogLevel[level] then
+        return
+    end
+
+    local message = table.concat({ ... }, " ")
+    local prefix = config.NameUpper .. ": "
+
+    logger.callbacks[level](prefix .. message)
 end
 
-logger.logCallback = function(...)
-	print(colors(config.NameUpper .. ": ", "magenta") .. ...);
-end;
-function logger:log(...)
-	if self.logLevel >= self.LogLevel.Log then
-		self.logCallback(...);
-	end
+function logger:debug(...)
+    emit("Debug", "grey", ...)
 end
 
 function logger:info(...)
-	if self.logLevel >= self.LogLevel.Log then
-		self.logCallback(...);
-	end
+    emit("Info", "magenta", ...)
 end
 
-logger.warnCallback = function(...)
-	print(colors(config.NameUpper .. ": " .. ..., "yellow"));
-end;
+logger.log = logger.info
+
 function logger:warn(...)
-	if self.logLevel >= self.LogLevel.Warn then
-		self.warnCallback(...);
-	end
+    emit("Warn", "yellow", ...)
 end
 
-logger.errorCallback = function(...)
-	print(colors(config.NameUpper .. ": " .. ..., "red"))
-	error(...);
-end;
 function logger:error(...)
-	self.errorCallback(...);
-	error(config.NameUpper .. ": logger.errorCallback did not throw an Error!");
+    local message = table.concat({ ... }, " ")
+    emit("Error", "red", message)
+    error(config.NameUpper .. ": " .. message, 2)
 end
 
-
-return logger;
+return logger
